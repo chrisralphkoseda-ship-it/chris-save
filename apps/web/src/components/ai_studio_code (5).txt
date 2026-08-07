@@ -1,0 +1,10 @@
+import React from 'react';
+import { LiveDashboard } from '../components/LiveDashboard';
+
+export default function Home() {
+  return (
+    <main className="min-h-screen bg-slate-950 p-6 flex items-center justify-center">
+      <LiveDashboard />
+    </main>
+  );
+}
