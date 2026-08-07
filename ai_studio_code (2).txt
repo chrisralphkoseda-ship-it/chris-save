@@ -1,0 +1,65 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String      @id @default(uuid())
+  authSubject  String      @unique @map("auth_subject")
+  displayName  String      @map("display_name")
+  timezone     String      @default("UTC")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  profile        SimProfile?
+  lifeEvents     LifeEvent[]
+  stateSnapshots SimStateSnapshot[]
+
+  @@map("users")
+}
+
+model SimProfile {
+  id               String   @id @default(uuid())
+  userId           String   @unique @map("user_id")
+  simName          String   @map("sim_name")
+  lifeStage        String   @default("Young Adult") @map("life_stage")
+  currentWorldLabel String  @default("Willow Creek") @map("current_world_label")
+  rulesetVersion   String   @map("ruleset_version")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sim_profiles")
+}
+
+model LifeEvent {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  eventType     String    @map("event_type")
+  occurredAt    DateTime  @map("occurred_at")
+  recordedAt    DateTime  @default(now()) @map("recorded_at")
+  sourceSurface String    @map("source_surface")
+  evidenceType  String    @map("evidence_type")
+  confidence    Float
+  payloadJson   Json      @map("payload_json")
+  deletedAt     DateTime? @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("life_events")
+}
+
+model SimStateSnapshot {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  asOf           DateTime @map("as_of")
+  rulesetVersion String   @map("ruleset_version")
+  stateVersion   Int      @map("state_version")
+  stateJson      Json     @map("state_json")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sim_state_snapshots")
+}
